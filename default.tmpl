@@ -1,0 +1,45 @@
+{{- range $i, $e := .SubPackages -}}
+{{- if eq $i 0 -}}
+# Template file for '{{fmt .Name}}'
+pkgname={{fmt .Name}}
+version={{fmtVersion $.Release.Version}}
+revision=1
+_version={{$.Release.Version}}
+wrksrc="{{$.Name}}-${_version}/{{.Name}}"
+build_style=cmake
+configure_args="
+ -DCATKIN_BUILD_BINARY_PACKAGE=OFF
+ -DCMAKE_INSTALL_PREFIX=/opt/ros/melodic
+ -DPYTHON_EXECUTABLE=/usr/bin/python3
+ -DPYTHON_INCLUDE_DIR=/usr/include/python3.6m
+ -DPYTHON_LIBRARY=/usr/lib/libpython3.6m.so
+ -DPYTHON_BASENAME=.cpython-36m
+ -DSETUPTOOLS_DEB_LAYOUT=OFF"
+hostmakedepends="cmake python3 ros-melodic-catkin{{fmtList .BuildDependencies 49 0 false}}"
+{{if .RunDependencies -}}
+depends="{{fmtList .RunDependencies 9 0 true}}"
+{{end -}}
+short_desc="ROS - {{fmtDesc .Description}}"
+maintainer="Young Jin Park <youngjinpark20@gmail.com>"
+license="BSD-3-Clause"
+homepage="http://www.ros.org"
+distfiles="{{$.TarballURL}}"
+checksum="{{$.CheckSum}}"
+
+pre_configure() {
+	unset ROS_DISTRO
+	unset ROS_PACKAGE
+	unset ROS_ETC_DIR
+	unset ROS_ROOT
+	unset ROS_MASTER
+	source /opt/ros/melodic/setup.sh
+}
+{{- else}}
+
+ros-melodic-{{fmt .Name}}_package() {
+	wrksrc="{{$.Name}}-${version}/{{.Name}}"
+	short_desc="ROS - {{fmtDesc .Description}}"
+	depends="{{fmtList .RunDependencies 9 1 true}}"
+}
+{{- end -}}
+{{- end}}
